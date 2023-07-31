@@ -1,0 +1,7 @@
+# Ghriorso
+
+> Named after Albert Ghiorso who holds the records for discovering or co-discovering the most chemical elements on the periodic table.
+
+Ghriorso intends to be the backbone of the AGOI search engine. Managing the collective and dissemination of web pages to form a collection of internet records.
+
+Ghriorso intends to use a simple combination of [TrustRank](https://en.wikipedia.org/wiki/TrustRank), [PageRank](https://en.wikipedia.org/wiki/PageRank) and Anti-TrustRank to determine the quality of webpages it is able to come across. As you may know, the goal of AGOI is to develop a search engine that only provides reputable results, to prevent the current internet momentum of a small faction of websites run by a monopolistic cabal of corporate gatekeepers becoming the dominant force on the internet. To do this AGOI believes a solution like Ghriorso is needed. A search engine that note only starts crawling from key, manually reviewed, `seeds` of reputable websites, which can then distribute this reputable ranking via the PageRank algorithm, but to also preform the inverse of crawling from, manually reviewed, negative `seeds` of the least reputable websites found, to decrease the scores of those around them, utilizing Anti-TrustRanking to do so. It is the hope of AGOI that through this method, there can be a better internet formed. One that truly utilizes the time we live in, thus it's name **Ag**e **O**f **I**nformation (AGOI).
