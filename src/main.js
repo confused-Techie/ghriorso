@@ -1,7 +1,69 @@
 
+const Ranker = require("./ranker.js");
+
 module.exports =
 class Ghriosro {
-  constructor() {
-    
+  constructor(opts = {}) {
+    // Options
+    if (!opts.hasOwnProperty("ranker")) {
+      opts.ranker = {};
+    }
+    this.rankerOpts = {
+      carrying_capacity: opts.ranker.carryingCapacity,
+      trust_steepness: opts.ranker.trustSteepness,
+      half_steep_point: opts.ranker.halfSteepPoint,
+      rankCache: null
+    };
+
+    if (!opts.hasOwnProperty("rankCache")) {
+      opts.rankCache = {};
+    }
+    this.rankCacheOpts = {
+      trustDefault: opts.rankCache.trustDefault,
+      antitrustDefault: opts.rankCache.antitrustDefault,
+      neutralDefault: opts.rankCache.neutralDefault,
+      distanceFallback: opts.rankCache.distanceFallback,
+      cache: {}
+    };
+
+    if (!opts.hasOwnProperty("crawlerManager")) {
+      opts.crawlerManager = {};
+    }
+    this.crawlerManagerOpts = {
+      waitTime: opts.crawlerManager.waitTime,
+      failOpen: opts.crawlerManager.failOpen,
+      userAgent: opts.crawlerManager.userAgent,
+      crawlLimits: opts.crawlerManager.crawlLimits,
+      ranker: null,
+      seedKind: null,
+      seedLinks: [],
+      sharedRobotsCache: null
+    };
+
+    this.ranker;
+    this.rankcache;
+    this.crawlerManager;
+
+    this.sharedRobotsCache = new Map();
+    this.persistentRankCache = {};
   }
+
+  init() {
+
+    this.rankCacheOpts.cache = this.persistentRankCache;
+    
+    this.rankCache = new RankCache(this.rankCacheOpts);
+
+    this.rankerOpts.rankCache = this.rankCache;
+
+    this.ranker = new Ranker(this.rankerOpts);
+
+    this.crawlerManagerOpts.ranker = this.ranker;
+    this.crawlerManagerOpts.sharedRobotsCache = this.sharedRobotsCache;
+
+    this.crawlerManager = new CrawlerManager(this.crawlerManagerOpts);
+
+  }
+
+
 }

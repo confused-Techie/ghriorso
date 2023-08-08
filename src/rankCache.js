@@ -24,20 +24,24 @@
 
 module.exports =
 class RankCache {
-  constructor() {
-    this.cache = {};
+  constructor(opts = {}) {
+    this.cache = opts.cache ?? {};
+    this.trustDefault = opts.trustDefault ?? 1;
+    this.antitrustDefault = opts.antitrustDefault ?? -1;
+    this.neutralDefault = opts.neutralDefault ?? 0.25;
+    this.distanceFallback = opts.distanceFallback ?? 5;
   }
 
   rankForSeed(seed) {
     // Returns the ranking assigned to a given seed
     switch(seed) {
       case "trust":
-        return 1;
+        return this.trustDefault;
       case "antitrust":
-        return -1;
+        return this.antitrustDefault;
       default:
         // The seed assigned to any non-seeded page
-        return 0.25;
+        return this.neutralDefault;
     }
   }
 
@@ -50,7 +54,7 @@ class RankCache {
       // We maybe want to throw here? Or do some investigation to a known solution
       // Or maybe use link anylisis to determine what's best to automatically assign?
       // TODO: For now, lets return 5, my gut likes it
-      return 5;
+      return this.distanceFallback;
     }
   }
 
