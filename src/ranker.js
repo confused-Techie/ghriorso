@@ -16,7 +16,10 @@ class Ranker {
     this.carrying_capacity = opts.carrying_capacity;
     this.trust_steepness = opts.trust_steepness;
     this.half_steep_point = opts.half_steep_point;
+    this.spam_penalty = 50;
     this.rankCache = opts.rankCache ?? new RankCache();
+
+    this.rankObjCache = [];
   }
 
   /**
@@ -35,11 +38,22 @@ class Ranker {
     // Now that we are sure the basic data of the ranking exists in our rank cache
     // lets go ahead and calculate what it's actual ranking should be.
 
+    let spamPenalty = 1;
+
+    if (this.rankCache.getPageRank(linkedFrom) < 0) {
+      spamPenalty = this.spam_penalty - this.rankCache.seedDistance(linkedFrom);
+      console.log(`Spam Penalty: ${spamPenalty}`);
+
+      if (spamPenalty < 1) {
+        spamPenalty = 1;
+      }
+    }
+
     const trustDistance = (page) => {
-      return linksOnPageCount / ( 1 + Math.E^( -this.trust_steepness * ( this.rankCache.seedDistance(page) - this.half_steep_point )));
+      return this.carrying_capacity / ( 1 + Math.E^( -this.trust_steepness * ( this.rankCache.seedDistance(page) - this.half_steep_point )));
     };
 
-    let newRank = this.rankCache.getPageRank(link) + ( this.rankCache.getPageRank(linkedFrom) / linksOnPageCount + trustDistance(link) );
+    let newRank = this.rankCache.getPageRank(link) + ( (this.rankCache.getPageRank(linkedFrom) * spamPenalty) / linksOnPageCount + trustDistance(link) );
 
     this.rankCache.setPageRank(link, newRank);
   }
@@ -63,18 +77,30 @@ class Ranker {
 
     // Now to begin transforming the data
     for (let i = 0; i < data.lonelyLinks.length; i++) {
-      let origin = new URL(lonelyLinks[i]).origin;
+      try {
+        let origin = new URL(data.lonelyLinks[i]).origin;
 
-      if (!rankObj.links.includes(origin)) {
-        rankObj.links.push(origin);
+        if (!rankObj.links.includes(origin)) {
+          rankObj.links.push(origin);
+        }
+      } catch(err) {
+        // If an error occurs it means we were given a bad URL. This should be filtered
+        // out by the crawler, but just in case
+        console.error(`Ranker was given a bad URL: ${data.lonelyLinks[i]}... Ignoring URL`);
       }
     }
 
     for (let node in data.textLinks) {
-      let origin = new URL(data.textLinks[node]).origin;
+      try {
+        let origin = new URL(data.textLinks[node]).origin;
 
-      if (!rankObj.links.includes(origin)) {
-        rankObj.links.push(origin);
+        if (!rankObj.links.includes(origin)) {
+          rankObj.links.push(origin);
+        }
+      } catch(err) {
+        // If an error occurs it means we were given a bad URL. This should be filtered
+        // out by the crawler, but just in case
+        console.error(`Ranker was given a bad URL: ${data.textLinks[node]}... Ignoring URL`);
       }
     }
 
@@ -92,6 +118,8 @@ class Ranker {
     // link will result in zero change. So this registering should only ever result
     // in the original seed link receiving the default ranking. As we would want.
     this.rankCache.registerLink(rankObj.initialLink, seed, null);
+
+    this.rankObjCache.push({ seed: seed, data: rankObj });
 
     for (let i = 0; i < rankObj.links.length; i++) {
       this.rankLink(rankObj.links[i], null, rankObj.initialLink, rankObj.totalLinkCount);

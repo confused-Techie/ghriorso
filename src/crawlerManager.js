@@ -20,6 +20,7 @@ class CrawlerManager {
 
     this.crawlers = {};
     this.crawlersLimits = {};
+    this.crawlersCache = {};
     // We use a shared robots cache, to ensure we can keep it around
     this.sharedRobotsCache = opts.sharedRobotsCache ?? new Map();
   }
@@ -28,6 +29,7 @@ class CrawlerManager {
 
     for (let i = 0; i < this.seedLinks.length; i++) {
       let id = cuid();
+      console.log(`Init CrawlerManager Creating crawler: ${id}`);
       this.crawlers[id] = new Crawler({
         userAgent: this.userAgent,
         waitTime: this.waitTime,
@@ -36,6 +38,7 @@ class CrawlerManager {
       });
 
       this.crawlersLimits[id] = 0;
+      this.crawlersCache[id] = [];
 
       this.handleCrawlerEvents(id, this.seedLinks[i]);
     }
@@ -72,6 +75,8 @@ class CrawlerManager {
         providedSeed = this.seedKind;
       }
 
+      this.crawlersCache[id].push({ seed: providedSeed, data: data });
+      
       this.ranker.ingestCrawlerData(data, providedSeed);
 
       if (this.crawlersLimits[id] === this.crawlLimits || this.crawlersLimits[id] > this.crawlLimits) {

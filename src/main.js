@@ -1,5 +1,7 @@
 
 const Ranker = require("./ranker.js");
+const RankCache = require("./rankCache.js");
+const CrawlerManager = require("./crawlerManager.js");
 
 module.exports =
 class Ghriosro {
@@ -35,23 +37,23 @@ class Ghriosro {
       userAgent: opts.crawlerManager.userAgent,
       crawlLimits: opts.crawlerManager.crawlLimits,
       ranker: null,
-      seedKind: null,
-      seedLinks: [],
+      seedKind: opts.crawlerManager.seedKind ?? null,
+      seedLinks: opts.crawlerManager.seedLinks ?? [],
       sharedRobotsCache: null
     };
 
     this.ranker;
-    this.rankcache;
+    this.rankCache;
     this.crawlerManager;
 
     this.sharedRobotsCache = new Map();
-    this.persistentRankCache = {};
+    this.persistentRankCache = opts.persistentRankCache ?? {};
   }
 
   init() {
 
     this.rankCacheOpts.cache = this.persistentRankCache;
-    
+
     this.rankCache = new RankCache(this.rankCacheOpts);
 
     this.rankerOpts.rankCache = this.rankCache;
@@ -63,6 +65,8 @@ class Ghriosro {
 
     this.crawlerManager = new CrawlerManager(this.crawlerManagerOpts);
 
+    // Init calls
+    this.crawlerManager.init();
   }
 
 

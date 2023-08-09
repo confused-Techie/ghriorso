@@ -79,7 +79,7 @@ class RankCache {
         seed: seed,
         distanceFromSeed: 0
       };
-
+      return;
     }
 
     // The page doesn't exist, but is not a seed page. So we will want to use `linkedFrom` to determine seed distance
